@@ -3,8 +3,8 @@ FROM ubuntu:18.04
 VOLUME /data
 VOLUME /config
 VOLUME /downloads
-volume /incomplete-downloads
-volume /watch
+VOLUME /incomplete-downloads
+VOLUME /watch
 
 ARG DOCKERIZE_ARCH=amd64
 ARG DOCKERIZE_VERSION=v0.6.1
