@@ -2,6 +2,9 @@ FROM ubuntu:18.04
 
 VOLUME /data
 VOLUME /config
+VOLUME /downloads
+volume /incomplete-downloads
+volume /watch
 
 ARG DOCKERIZE_ARCH=amd64
 ARG DOCKERIZE_VERSION=v0.6.1
@@ -18,6 +21,7 @@ RUN apt update \
     && apt update \
     && apt install -y sudo transmission-cli transmission-common transmission-daemon curl rar unrar zip unzip ufw iputils-ping openvpn bc tzdata \
     python2.7 python2.7-pysqlite2 && ln -sf /usr/bin/python2.7 /usr/bin/python2 \
+    && apt-get install -y sabnzbdplus par2-tbb python-sabynec p7zip-full locals\
     && wget https://github.com/Secretmapper/combustion/archive/release.zip \
     && unzip release.zip -d /opt/transmission-ui/ \
     && rm release.zip \
@@ -36,7 +40,9 @@ RUN apt update \
     && apt clean && rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/* \
     && groupmod -g 1000 users \
     && useradd -u 911 -U -d /config -s /bin/false abc \
-    && usermod -G users abc
+    && usermod -G users abc \
+    && printf "USER=root\nHOST=0.0.0.0\nPORT=8081\nCONFIG=/config/sabnzbd-home\n" > /etc/default/sabnzbdplus \
+    && /etc/init.d/sabnzbdplus start
 
 ADD openvpn/ /etc/openvpn/
 ADD transmission/ /etc/transmission/
@@ -141,4 +147,5 @@ HEALTHCHECK --interval=5m CMD /etc/scripts/healthcheck.sh
 # Expose port and run
 EXPOSE 9091
 EXPOSE 8888
+EXPOSE 8081
 CMD ["dumb-init", "/etc/openvpn/start.sh"]
